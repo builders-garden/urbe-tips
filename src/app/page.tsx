@@ -1,101 +1,190 @@
+"use client";
 import Image from "next/image";
+import { PrivyProvider } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
+import { DaimoPayButton } from "@daimo/pay";
+import { DaimoPayProvider, getDefaultConfig } from "@daimo/pay";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider, createConfig } from "wagmi";
+import { optimismUSDC } from "@daimo/contract";
+import { createPublicClient, getAddress, http } from "viem";
+import { normalize } from "viem/ens";
+import { base, mainnet } from "wagmi/chains";
+import { useState, useEffect } from "react";
+import { VT323, Press_Start_2P } from "next/font/google";
+import { addEnsContracts, createEnsPublicClient } from "@ensdomains/ensjs";
+import { getResolver } from "@ensdomains/ensjs/public";
+
+const vt323 = VT323({
+  weight: "400",
+  subsets: ["latin"],
+});
+
+const pressStart2P = Press_Start_2P({
+  weight: "400",
+  subsets: ["latin"],
+});
+
+const config = createConfig(
+  getDefaultConfig({
+    appName: "Wolf's Beer Fund",
+    ssr: true,
+  })
+);
+
+const queryClient = new QueryClient();
+const client = createPublicClient({
+  chain: addEnsContracts(mainnet),
+  transport: http(),
+});
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <DaimoPayProvider>
+          <PrivyProvider
+            appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
+            config={{
+              appearance: {
+                theme: "light",
+                accentColor: "#676FFF",
+                logo: "https://your-logo-url",
+              },
+              embeddedWallets: {
+                createOnLogin: "users-without-wallets",
+              },
+            }}
+          >
+            <HomeContent />
+          </PrivyProvider>
+        </DaimoPayProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+function HomeContent() {
+  const { login, authenticated } = usePrivy();
+  const [showCheers, setShowCheers] = useState(false);
+  const [recipientAddress, setRecipientAddress] = useState<string>(
+    "0xF416fffcF021d2d95eb777dC3424ee18a06beC26"
+  );
+
+  useEffect(() => {
+    async function fetchEnsAddress() {
+      try {
+        const resolver = await getResolver(client, {
+          name: normalize("urbe-hub.fkey.eth"),
+        });
+
+        const ensAddress = await client.getEnsAddress({
+          name: normalize("urbe-hub.fkey.eth"),
+          universalResolverAddress:
+            resolver === "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41" ||
+            resolver === "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63"
+              ? ("" as `0x${string}`)
+              : (resolver as `0x${string}`),
+        });
+
+        if (ensAddress) {
+          setRecipientAddress(ensAddress);
+        } else {
+        }
+      } catch (error) {
+        console.error("Detailed error fetching ENS address:", error);
+      }
+    }
+
+    fetchEnsAddress();
+  }, []); // Empty dependency array means this runs on mount
+
+  return (
+    <div className="min-h-screen bg-[#2C2137] p-12 font-[Press_Start_2P] text-white relative">
+      <main className="flex flex-col items-center justify-center gap-12 pt-16">
+        {/* Pixel Art Wolf and Beer */}
+        <pre className="text-[#FFA500] text-base leading-[14px] font-mono whitespace-pre"></pre>
+
+        <h1
+          className={`text-6xl text-center text-[#FFA500] mt-8 animate-pulse ${vt323.className}`}
+        >
+          🐺 Urbe tips 🐺
+        </h1>
+
+        <div className="max-w-xl w-full p-6 bg-[#3C2C47] border-4 border-[#FFA500] rounded-lg shadow-lg opacity-80">
+          <p className="text-lg leading-relaxed text-center text-[#FFA500]">
+            Help keep Urbe caffeinated! Contributions are used to buy stuff for
+            urbe hub and the community 🙏
+          </p>
         </div>
+
+        {!authenticated ? (
+          <button
+            onClick={login}
+            className="px-16 py-8 bg-[#FFA500] text-black border-8 border-b-12 border-r-12 border-[#8B4513] 
+              hover:bg-[#FFB52E] active:border-b-8 active:border-r-8 
+              transition-all font-bold text-3xl
+              animate-pulse hover:animate-none
+              shadow-2xl hover:shadow-[#FFA500]/50"
+          >
+            [ CONNECT WALLET ]
+          </button>
+        ) : (
+          <>
+            <DaimoPayButton.Custom
+              appId="pay-demo"
+              toChain={optimismUSDC.chainId}
+              toUnits="5.00"
+              toToken={getAddress(optimismUSDC.token)}
+              toAddress={recipientAddress as `0x${string}`}
+              onPaymentStarted={(e) => console.log("Payment started:", e)}
+              onPaymentCompleted={(e) => {
+                console.log("Payment completed:", e);
+                setShowCheers(true);
+                setTimeout(() => setShowCheers(false), 3000);
+              }}
+            >
+              {({ show }) => (
+                <button
+                  onClick={show}
+                  className={`px-16 py-8 bg-gradient-to-r from-purple-600 to-red-500 text-white border-8 border-b-12 border-r-12 border-purple-900 
+                    hover:from-purple-500 hover:to-red-400 
+                    active:border-b-8 active:border-r-8 
+                    transition-all font-bold text-2xl
+                    animate-pulse hover:animate-none
+                    shadow-2xl hover:shadow-purple-500/50
+                    relative overflow-hidden ${vt323.className}`}
+                >
+                  <span className="relative z-10"> Donate ☕️</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-red-300 opacity-0 hover:opacity-20 transition-opacity"></div>
+                </button>
+              )}
+            </DaimoPayButton.Custom>
+
+            <p className={`text-[#FFA500]/70 mt-4 ${vt323.className} text-xl`}>
+              or send to{" "}
+              <a
+                href="https://urbe-hub.fkey.id/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="italic text-[#FFA500] hover:text-[#FFB52E] transition-colors"
+              >
+                urbe-hub.fkey.eth
+              </a>
+              <div className="inline-block ml-2">↗️
+              </div>
+            </p>
+
+            {showCheers && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-[#FFA500] text-black p-12 border-8 border-[#8B4513] animate-bounce">
+                  <h2 className="text-4xl">🍻 Cheers! 🍻</h2>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
