@@ -155,7 +155,7 @@ function HomeContent() {
                     shadow-2xl hover:shadow-purple-500/50
                     relative overflow-hidden ${vt323.className}`}
                 >
-                  <span className="relative z-10"> Donate ☕️</span>
+                  <span className="relative z-10">💰 Tip Urbe 💰</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-red-300 opacity-0 hover:opacity-20 transition-opacity"></div>
                 </button>
               )}
@@ -163,16 +163,7 @@ function HomeContent() {
 
             <p className={`text-[#FFA500]/70 mt-4 ${vt323.className} text-xl`}>
               or send to{" "}
-              <a
-                href="https://urbe-hub.fkey.id/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="italic text-[#FFA500] hover:text-[#FFB52E] transition-colors"
-              >
-                urbe-hub.fkey.eth
-              </a>
-              <div className="inline-block ml-2">↗️
-              </div>
+              <span className="text-[#FFA500]">urbe-hub.fkey.eth</span>
             </p>
 
             {showCheers && (
