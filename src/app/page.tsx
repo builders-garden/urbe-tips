@@ -29,7 +29,7 @@ const config = createConfig(
   })
 );
 const USDC_BASE_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-const FALLBACK_ADDRESS = "0x6C4f8B39933147809c6AC0c4482ba20A544F414C";
+const FALLBACK_ADDRESS = "0x2DaF5595748e3C63e5538D09391b9d1783d352f8";
 
 const queryClient = new QueryClient();
 const client = createPublicClient({
@@ -57,30 +57,35 @@ function HomeContent() {
   useEffect(() => {
     async function fetchEnsAddress() {
       try {
+        const name = "urbe-hub-tips.fkey.eth";
+
         const resolver = await getResolver(client, {
-          name: normalize("urbe-hub.fkey.eth"),
+          name: normalize(name),
         });
 
+        if (!resolver) {
+          console.log("No resolver found for ENS name");
+          return;
+        }
+
         const ensAddress = await client.getEnsAddress({
-          name: normalize("urbe-hub.fkey.eth"),
-          universalResolverAddress:
-            resolver === "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41" ||
-            resolver === "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63"
-              ? ("" as `0x${string}`)
-              : (resolver as `0x${string}`),
+          name: normalize(name),
+          universalResolverAddress: resolver as `0x${string}`,
         });
 
         if (ensAddress) {
           setRecipientAddress(ensAddress);
         } else {
+          setRecipientAddress(FALLBACK_ADDRESS);
         }
       } catch (error) {
-        console.error("Detailed error fetching ENS address:", error);
+        console.error("Error fetching ENS address:", error);
+        setRecipientAddress(FALLBACK_ADDRESS);
       }
     }
 
     fetchEnsAddress();
-  }, []); // Empty dependency array means this runs on mount
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#2C2137] p-4 sm:p-8 md:p-12 font-[Press_Start_2P] text-white relative">
@@ -134,12 +139,12 @@ function HomeContent() {
         >
           or send to{" "}
           <a
-            href="https://urbe-hub.fkey.id/"
+            href="https://urbe-hub-tips.fkey.id/"
             target="_blank"
             rel="noopener noreferrer"
             className="italic text-[#FFA500] hover:text-[#FFB52E] transition-colors"
           >
-            urbe-hub.fkey.eth
+            urbe-hub-tips.fkey.eth
           </a>
         </p>
 
