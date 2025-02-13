@@ -19,10 +19,6 @@ const vt323 = VT323({
   subsets: ["latin"],
 });
 
-const pressStart2P = Press_Start_2P({
-  weight: "400",
-  subsets: ["latin"],
-});
 
 const config = createConfig(
   getDefaultConfig({
