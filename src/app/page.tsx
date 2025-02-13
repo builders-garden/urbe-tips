@@ -4,13 +4,15 @@ import { DaimoPayButton } from "@daimo/pay";
 import { DaimoPayProvider, getDefaultConfig } from "@daimo/pay";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider, createConfig } from "wagmi";
-import { createPublicClient, getAddress, http } from "viem";
+import { createPublicClient, encodeFunctionData, getAddress, http } from "viem";
 import { normalize } from "viem/ens";
 import { base, mainnet, worldchain } from "wagmi/chains";
 import { useState, useEffect } from "react";
 import { VT323, Press_Start_2P } from "next/font/google";
 import { addEnsContracts, createEnsPublicClient } from "@ensdomains/ensjs";
 import { getResolver } from "@ensdomains/ensjs/public";
+import { azuroBetAbi } from "./lib/abi";
+import { encodeAbiParameters } from "viem";
 
 const vt323 = VT323({
   weight: "400",
@@ -29,8 +31,36 @@ const config = createConfig(
   })
 );
 const USDC_BASE_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+const WETH_BASE_ADDRESS = "0x4200000000000000000000000000000000000006";
+const AZURO_LP_ADDRESS = "0xF22E9e29728d6592eB54b916Ba9f464d9F237dB1";
 const FALLBACK_ADDRESS = "0x6C4f8B39933147809c6AC0c4482ba20A544F414C";
 
+const innerBetData = encodeAbiParameters(
+  [
+    { name: "condition", type: "uint256" },
+    { name: "outcome", type: "uint64" },
+  ],
+  [BigInt("100610060000000000265432240000000000000445516243"), BigInt("29")]
+);
+
+const betData = {
+  affiliate: "0xDB6308968A6d90892A65989A318E0F0408147317" as `0x${string}`,
+  minOdds: BigInt(1),
+  data: innerBetData,
+};
+
+const encodedAzuroBet = encodeFunctionData({
+  abi: azuroBetAbi,
+  functionName: "betFor",
+  args: [
+    "0xDB6308968A6d90892A65989A318E0F0408147317",
+    "0xf5A6B7940cbdb80F294f1eAc59575562966aa3FC",
+    BigInt(500000000000000),
+    BigInt(1741875158),
+    betData,
+  ],
+});
+console.log(encodedAzuroBet, "encodedAzuroBet");
 const queryClient = new QueryClient();
 const client = createPublicClient({
   chain: addEnsContracts(mainnet),
@@ -101,8 +131,10 @@ function HomeContent() {
         <DaimoPayButton.Custom
           appId="pay-demo"
           toChain={base.id}
-          toToken={USDC_BASE_ADDRESS}
-          toAddress={recipientAddress as `0x${string}`}
+          toToken={WETH_BASE_ADDRESS}
+          toAddress={"0xF22E9e29728d6592eB54b916Ba9f464d9F237dB1" as `0x${string}`}
+          toUnits="0.00076"
+          toCallData={encodedAzuroBet}
           onPaymentStarted={(e) => console.log("Payment started:", e)}
           onPaymentCompleted={(e) => {
             console.log("Payment completed:", e);
