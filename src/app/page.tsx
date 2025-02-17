@@ -62,6 +62,7 @@ function HomeContent() {
         const resolver = await getResolver(client, {
           name: normalize(name),
         });
+        console.log("resolver", resolver);
 
         if (!resolver) {
           console.log("No resolver found for ENS name");
@@ -72,6 +73,7 @@ function HomeContent() {
           name: normalize(name),
           universalResolverAddress: resolver as `0x${string}`,
         });
+        console.log("ensAddress", ensAddress);
 
         if (ensAddress) {
           setRecipientAddress(ensAddress);
@@ -91,13 +93,13 @@ function HomeContent() {
     <div className="min-h-screen bg-[#2C2137] p-4 sm:p-8 md:p-12 font-[Press_Start_2P] text-white relative">
       <main className="flex flex-col items-center justify-center gap-6 sm:gap-8 md:gap-12 pt-8 sm:pt-12 md:pt-16">
         <h1
-          className={`text-4xl sm:text-5xl md:text-6xl text-center text-[#FFA500] mt-4 sm:mt-6 md:mt-8 animate-pulse ${vt323.className}`}
+          className={`text-5xl sm:text-6xl md:text-7xl text-center text-[#FFA500] mt-4 sm:mt-6 md:mt-8 animate-pulse ${vt323.className}`}
         >
           🐺 Urbe tips 🐺
         </h1>
 
-        <div className="max-w-xl w-full p-4 sm:p-6 bg-[#3C2C47] border-4 border-[#FFA500] rounded-lg shadow-lg opacity-80 mx-4">
-          <p className="text-base sm:text-lg leading-relaxed text-center text-[#FFA500]">
+        <div className="max-w-2xl w-full p-6 sm:p-8 bg-[#3C2C47] border-4 border-[#FFA500] rounded-lg shadow-lg opacity-80 mx-4">
+          <p className="text-lg sm:text-xl md:text-2xl leading-relaxed text-center text-[#FFA500]">
             Help keep Urbe caffeinated! Contributions are used to buy stuff for
             urbe hub and the community 🙏
           </p>
@@ -118,11 +120,11 @@ function HomeContent() {
           {({ show }) => (
             <button
               onClick={show}
-              className={`px-8 sm:px-12 md:px-16 py-6 sm:py-7 md:py-8 bg-gradient-to-r from-purple-600 to-red-500 
+              className={`px-10 sm:px-14 md:px-20 py-8 sm:py-9 md:py-10 bg-gradient-to-r from-purple-600 to-red-500 
                 text-white border-4 sm:border-8 border-b-8 sm:border-b-12 border-r-8 sm:border-r-12 border-purple-900 
                 hover:from-purple-500 hover:to-red-400 
                 active:border-b-6 active:border-r-6 
-                transition-all font-bold text-lg sm:text-xl md:text-2xl
+                transition-all font-bold text-xl sm:text-2xl md:text-3xl
                 animate-pulse hover:animate-none
                 shadow-2xl hover:shadow-purple-500/50
                 relative overflow-hidden ${vt323.className}
@@ -135,7 +137,7 @@ function HomeContent() {
         </DaimoPayButton.Custom>
 
         <p
-          className={`text-[#FFA500]/70 mt-4 ${vt323.className} text-base sm:text-lg md:text-xl px-4 text-center`}
+          className={`text-[#FFA500]/70 mt-4 ${vt323.className} text-lg sm:text-xl md:text-2xl px-4 text-center`}
         >
           or send to{" "}
           <a
@@ -150,8 +152,8 @@ function HomeContent() {
 
         {showCheers && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-[#FFA500] text-black p-12 border-8 border-[#8B4513] animate-bounce">
-              <h2 className="text-4xl">🍻 Cheers! 🍻</h2>
+            <div className="bg-[#FFA500] text-black p-16 border-8 border-[#8B4513] animate-bounce">
+              <h2 className="text-5xl">🍻 Cheers! 🍻</h2>
             </div>
           </div>
         )}
